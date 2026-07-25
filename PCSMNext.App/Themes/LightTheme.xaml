@@ -1,0 +1,67 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- ===== 基础色 ===== -->
+    <SolidColorBrush x:Key="ColorBg" Color="#f6f2ec"/>
+    <!-- 暖白米色 -->
+    <SolidColorBrush x:Key="ColorSidebar" Color="#ffffff"/>
+    <SolidColorBrush x:Key="ColorSurface" Color="#fcfaf7"/>
+    <SolidColorBrush x:Key="ColorBorder" Color="#e5ddd4"/>
+
+    <!-- ===== 文字层级 ===== -->
+    <SolidColorBrush x:Key="ColorTextWhite" Color="#ffffff"/>
+    <SolidColorBrush x:Key="ColorTextBlack" Color="#2c241e"/>
+    <SolidColorBrush x:Key="ColorTextTitle" Color="#2c241e"/>
+    <SolidColorBrush x:Key="ColorTextMuted" Color="#8a7f72"/>
+
+    <!-- ===== 强调色系统 ===== -->
+    <SolidColorBrush x:Key="ColorAccent" Color="#e8963a"/>
+    <SolidColorBrush x:Key="ColorAccentHover" Color="#f0a85a"/>
+    <SolidColorBrush x:Key="ColorAccentPressed" Color="#cf8230"/>
+    <SolidColorBrush x:Key="ColorAccent2" Color="#0d9488"/>
+
+    <!-- ===== 状态色 ===== -->
+    <SolidColorBrush x:Key="ColorSuccess" Color="#16a34a"/>
+    <SolidColorBrush x:Key="ColorDanger" Color="#dc2626"/>
+    <SolidColorBrush x:Key="ColorWarning" Color="#ca8a04"/>
+
+    <!-- ===== 导航栏状态 ===== -->
+    <SolidColorBrush x:Key="ColorNavActiveBg" Color="#c7d9f0"/>
+    <SolidColorBrush x:Key="ColorNavHoverBg" Color="#ede7e0"/>
+
+    <!-- ===== 按钮样式 ===== -->
+    <!-- 普通导航按钮 -->
+    <Style TargetType="Button" x:Key="NavButton">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource ColorTextTitle}"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Height" Value="44"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="Padding" Value="20,0,0,0"/>
+        <Setter Property="BorderThickness" Value="0,0,3,0"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource ColorNavHoverBg}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- 选中状态导航按钮 -->
+    <Style TargetType="Button" x:Key="ActiveNavButton" BasedOn="{StaticResource NavButton}">
+        <Setter Property="Background" Value="{DynamicResource ColorNavActiveBg}"/>
+        <Setter Property="Foreground" Value="{DynamicResource ColorTextBlack}"/>
+        <!-- 亮色背景下用深色文字 -->
+        <Setter Property="BorderBrush" Value="{DynamicResource ColorBorder}"/>
+        <Setter Property="BorderThickness" Value="0,0,3,0"/>
+    </Style>
+
+    <!-- 主要按钮 -->
+    <Style TargetType="Button" x:Key="PrimaryButton">
+        <Setter Property="Background" Value="{StaticResource ColorAccent}"/>
+        <Setter Property="Foreground" Value="{StaticResource ColorTextWhite}"/>
+        <Setter Property="Padding" Value="12,6"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+    </Style>
+</ResourceDictionary>
