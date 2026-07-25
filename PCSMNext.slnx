@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="LivelyAnimationEngine/LivelyAnimationEngine.csproj" Id="deb60a1d-c71c-42ba-a76b-da74b8a4f54d" />
+  <Project Path="PCSMNext.App/PCSMNext.App.csproj" />
+  <Project Path="PCSMNext.Core/PCSMNext.Core.csproj" />
+  <Project Path="PCSMNext.Services/PCSMNext.Services.csproj" />
+</Solution>
