@@ -15,7 +15,7 @@
             <StackPanel Margin="30">
                 <!-- 标题 -->
                 <TextBlock Text="设置" FontSize="24" FontWeight="Bold"
-                   Foreground="#f0a050" Margin="0,0,0,24"/>
+                   Foreground="{DynamicResource ColorAccent}" Margin="0,0,0,24"/>
 
                 <!-- 主题选择 -->
                 <TextBlock Text="主题" FontSize="14" Margin="0,0,0,6"/>
@@ -45,7 +45,7 @@
 
                 <!-- 操作按钮 -->
                 <StackPanel Orientation="Horizontal">
-                    <controls:MyIconButton Content="重置" Command="{Binding ResetSettingsCommand}"/>
+                    <controls:MyIconButton x:Name="reset" Content="重置" Command ="{Binding ResetSettingsCommand}"/>
                 </StackPanel>
 
                 <!-- 状态消息 -->

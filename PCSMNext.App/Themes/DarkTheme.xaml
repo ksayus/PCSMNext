@@ -10,9 +10,11 @@
     <SolidColorBrush x:Key="ColorBorder" Color="#2a3a4e"/>
     <!-- 边框 -->
 
+    <SolidColorBrush x:Key="ColorHint" Color="#545454"/>
+
     <!-- ===== 文字层级 ===== -->
     <SolidColorBrush x:Key="ColorTextWhite" Color="#f0f4fa"/>
-    <SolidColorBrush x:Key="ColorTextBlack" Color="#11181f"/>
+    <SolidColorBrush x:Key="ColorTextBlack" Color="#c6c6c6"/>
     <SolidColorBrush x:Key="ColorTextTitle" Color="#e6edf5"/>
     <SolidColorBrush x:Key="ColorTextMuted" Color="#7b8ba3"/>
 
@@ -26,6 +28,11 @@
     <SolidColorBrush x:Key="ColorSuccess" Color="#22c55e"/>
     <SolidColorBrush x:Key="ColorDanger" Color="#ef4444"/>
     <SolidColorBrush x:Key="ColorWarning" Color="#eab308"/>
+
+    <SolidColorBrush x:Key="ColorButtonBg1" Color="#f0a050"/>
+    <SolidColorBrush x:Key="ColorButtonOver1" Color="#f5b870"/>
+    <SolidColorBrush x:Key="ColorButtonPressed1" Color="#d98e3a"/>
+    <SolidColorBrush x:Key="ColorButtonEnabled1" Color="#1a2736"/>
 
     <!-- ===== 导航栏状态 ===== -->
     <SolidColorBrush x:Key="ColorNavActiveBg" Color="#3b6cb7"/>
@@ -56,14 +63,5 @@
         <Setter Property="Foreground" Value="{DynamicResource ColorTextWhite}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource ColorBorder}"/>
         <Setter Property="BorderThickness" Value="0,0,3,0"/>
-    </Style>
-
-    <!-- 主要按钮（原PrimaryButton保持不变） -->
-    <Style TargetType="Button" x:Key="PrimaryButton">
-        <Setter Property="Background" Value="{StaticResource ColorAccent}"/>
-        <Setter Property="Foreground" Value="{StaticResource ColorTextBlack}"/>
-        <Setter Property="Padding" Value="12,6"/>
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Cursor" Value="Hand"/>
     </Style>
 </ResourceDictionary>

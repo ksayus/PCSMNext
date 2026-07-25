@@ -92,7 +92,7 @@
                                         Command="{Binding DataContext.DeleteServerCommand,
                                             RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                         CommandParameter="{Binding}"
-                                        Background="#3a2030" Foreground="#e05050"
+                                        Background="{DynamicResource ColorDanger}" Foreground="{DynamicResource ColorTextWhite}"
                                         BorderThickness="0" FontSize="12"/>
                                     </StackPanel>
                                 </Grid>

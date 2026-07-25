@@ -10,6 +10,9 @@
     <SolidColorBrush x:Key="ColorBorder"     Color="#1370f3"/>
     <!-- 分割线/边框 -->
 
+    <!-- 通知栏 -->
+    <SolidColorBrush x:Key="ColorHint" Color="#4492ff"/>
+
     <!-- === 文字层级 === -->
     <SolidColorBrush x:Key="ColorTextWhite"       Color="#f7faff"/>
     <SolidColorBrush x:Key="ColorTextBlue"   Color="#1A76D2"/>
@@ -68,9 +71,5 @@
         <Setter Property="Background" Value="{DynamicResource ColorNavActiveBg}"/>
         <Setter Property="Foreground" Value="{DynamicResource ColorBg}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource ColorBorder}"/>
-    </Style>
-    <Style TargetType="Button" x:Key="PrimaryButton">
-        <Setter Property="Background" Value="{StaticResource ColorAccent}"/>
-        <Setter Property="Foreground" Value="{StaticResource ColorBg}"/>
     </Style>
 </ResourceDictionary>

@@ -8,8 +8,6 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Themes/DefaultTheme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-
-            <SolidColorBrush x:Key="ColorHint" Color="#4492ff"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

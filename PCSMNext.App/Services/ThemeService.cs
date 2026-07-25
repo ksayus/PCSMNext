@@ -1,6 +1,10 @@
 ﻿using Serilog;
 using PCSMNext.Services;
 using System.Windows;
+using System.Windows.Media;
+using LAE;
+using Microsoft.Windows.Themes;
+using System.Collections;
 
 namespace PCSMNext.App.Services;
 
@@ -14,7 +18,6 @@ public class ThemeService
         DarkTheme,
         LightTheme,
     }
-
     // 支持的主题列表
     public static readonly string[] AvailableTheme = { ThemeName.DefaultTheme.ToString(), ThemeName.DarkTheme.ToString(),
                                                         ThemeName.LightTheme.ToString()};
@@ -50,10 +53,7 @@ public class ThemeService
             appResources.MergedDictionaries.Remove(currentTheme);
 
         // 加载新主题
-        var newTheme = new ResourceDictionary
-        {
-            Source = new Uri($"Themes/{themeName.ToString()}.xaml", UriKind.Relative)
-        };
+        var newTheme = GetThemeResource(themeName);
 
         appResources.MergedDictionaries.Add(newTheme);
 
@@ -69,7 +69,12 @@ public class ThemeService
         ApplyTheme(theme);
     }
 
-    public ThemeName GetTheme(string themeName)
+    /// <summary>
+    /// 获取主题名的枚举类型
+    /// </summary>
+    /// <param name="themeName">主题名(字符串)</param>
+    /// <returns></returns>
+    public static ThemeName GetTheme(string themeName)
     {
         ThemeName theme = ThemeName.DefaultTheme;
 
@@ -77,5 +82,18 @@ public class ThemeService
             theme = result;
 
         return theme;
+    }
+    /// <summary>
+    /// 获取主题文件
+    /// </summary>
+    /// <param name="themeName">主题名(枚举)</param>
+    /// <returns></returns>
+    private static ResourceDictionary GetThemeResource(ThemeName themeName)
+    {
+        var newTheme = new ResourceDictionary
+        {
+            Source = new Uri($"Themes/{themeName.ToString()}.xaml", UriKind.Relative)
+        };
+        return newTheme;
     }
 }

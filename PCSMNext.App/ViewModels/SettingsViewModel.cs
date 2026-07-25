@@ -30,7 +30,7 @@ public partial class SettingsViewModel : ObservableObject
             {
                 _currentConfig.App.Theme = value;
 
-                var themeEnum = _themeService.GetTheme(value);
+                var themeEnum = ThemeService.GetTheme(value);
                 _themeService.ApplyTheme(themeEnum);
 
                 SaveSettings();
@@ -115,7 +115,6 @@ public partial class SettingsViewModel : ObservableObject
         _selectedUpdateSources = _currentConfig.App.AutoUpdateSource;
     }
 
-    [RelayCommand]
     private void SaveSettings()
     {
         _configService.SaveAppConfig(_currentConfig);
@@ -132,6 +131,7 @@ public partial class SettingsViewModel : ObservableObject
         SelectedTheme = _currentConfig.App.Theme;
 
         StatusMessage = "设置已重置为默认值";
+
         Log.Information("The user reset the setting to default value.");
     }
 }

@@ -29,6 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LivelyAnimationEngine\LivelyAnimationEngine.csproj" />
     <ProjectReference Include="..\PCSMNext.Core\PCSMNext.Core.csproj" />
     <ProjectReference Include="..\PCSMNext.Services\PCSMNext.Services.csproj" />
   </ItemGroup>
