@@ -6,8 +6,10 @@ name: PCSMNext CI/CD
 # 框架: net10.0-windows7.0 / net10.0
 # 解决方案格式: .slnx (需要 .NET 10 SDK)
 #
-# 注意: 此 yml 文件应放在 PCSMNext 仓库的 .github/workflows/ 目录下
-#       如果在其他仓库运行，checkout 会通过 repository 参数显式指定 PCSMNext
+# 关键修复: .slnx 和 .csproj 中 LAE 引用路径为
+#   LivelyAnimationEngine/LivelyAnimationEngine.csproj
+#   但实际路径为 LivelyAnimationEngine/LAE/LivelyAnimationEngine.csproj
+#   本工作流在克隆依赖后自动修正路径，确保 .slnx 能正常构建
 # ============================================================
 
 on:
@@ -41,8 +43,6 @@ jobs:
     steps:
       # ----------------------------------------------------------
       # Step 1: 检出 PCSMNext 代码
-      # 显式指定 repository 确保无论 workflow 在哪个仓库运行，
-      # 都能正确检出 PCSMNext 到工作目录根路径
       # ----------------------------------------------------------
       - name: 检出 PCSMNext 代码
         uses: actions/checkout@v4
@@ -76,9 +76,9 @@ jobs:
 
       # ----------------------------------------------------------
       # Step 4: 克隆 LivelyAnimationEngine 依赖仓库
-      # .slnx 中引用路径: LivelyAnimationEngine/LivelyAnimationEngine.csproj
-      # 克隆后验证:   LivelyAnimationEngine/LAE/LivelyAnimationEngine.csproj
-      # 注意路径差异 — .slnx 写的路径可能和实际目录结构不匹配
+      #   .slnx 引用: LivelyAnimationEngine/LivelyAnimationEngine.csproj
+      #   实际路径:   LivelyAnimationEngine/LAE/LivelyAnimationEngine.csproj
+      #   克隆后自动修正路径差异
       # ----------------------------------------------------------
       - name: 克隆 LivelyAnimationEngine
         run: |
@@ -89,43 +89,44 @@ jobs:
           dir LivelyAnimationEngine\LAE\LivelyAnimationEngine.csproj
 
       # ----------------------------------------------------------
-      # Step 5: 还原 NuGet 包
-      # 优先使用 .slnx 还原；失败则逐个项目还原
+      # Step 5: 修正 .slnx 中 LAE 项目路径
+      #   将 LivelyAnimationEngine/LivelyAnimationEngine.csproj
+      #   改为 LivelyAnimationEngine/LAE/LivelyAnimationEngine.csproj
       # ----------------------------------------------------------
-      - name: 还原 NuGet 包 (.slnx)
-        run: dotnet restore PCSMNext.slnx
-        continue-on-error: true
-
-      - name: 还原 NuGet 包 (逐个项目)
-        if: failure()
+      - name: 修正 .slnx 中的 LAE 项目路径
         run: |
-          echo "=== .slnx restore 失败，回退到逐个项目 restore ==="
-          dotnet restore PCSMNext.Core\PCSMNext.Core.csproj
-          dotnet restore PCSMNext.Services\PCSMNext.Services.csproj
-          dotnet restore LivelyAnimationEngine\LAE\LivelyAnimationEngine.csproj
-          dotnet restore PCSMNext.App\PCSMNext.App.csproj
+          (Get-Content PCSMNext.slnx) -replace 'LivelyAnimationEngine/LivelyAnimationEngine.csproj', 'LivelyAnimationEngine/LAE/LivelyAnimationEngine.csproj' | Set-Content PCSMNext.slnx
+          echo "=== 修正后的 .slnx ==="
+          type PCSMNext.slnx
 
       # ----------------------------------------------------------
-      # Step 6: 构建项目
-      # 优先使用 .slnx 构建；失败则逐个项目构建
+      # Step 6: 修正 PCSMNext.App.csproj 中 LAE 项目引用路径
+      #   将 ..\LivelyAnimationEngine\LivelyAnimationEngine.csproj
+      #   改为 ..\LivelyAnimationEngine\LAE\LivelyAnimationEngine.csproj
       # ----------------------------------------------------------
-      - name: 构建项目 (.slnx)
+      - name: 修正 .csproj 中的 LAE 项目引用路径
+        run: |
+          (Get-Content PCSMNext.App\PCSMNext.App.csproj) -replace '\.\.\\LivelyAnimationEngine\\LivelyAnimationEngine\.csproj', '..\LivelyAnimationEngine\LAE\LivelyAnimationEngine.csproj' | Set-Content PCSMNext.App\PCSMNext.App.csproj
+          echo "=== 修正后的 PCSMNext.App.csproj ==="
+          type PCSMNext.App\PCSMNext.App.csproj
+
+      # ----------------------------------------------------------
+      # Step 7: 还原 NuGet 包
+      # ----------------------------------------------------------
+      - name: 还原 NuGet 包
+        run: dotnet restore PCSMNext.slnx
+
+      # ----------------------------------------------------------
+      # Step 8: 构建项目
+      # ----------------------------------------------------------
+      - name: 构建项目
         run: >
           dotnet build PCSMNext.slnx
           --configuration ${{ env.BUILD_CONFIGURATION }}
           --no-restore
 
-      - name: 构建项目 (逐个项目)
-        if: failure()
-        run: |
-          echo "=== .slnx build 失败，回退到逐个项目 build ==="
-          dotnet build PCSMNext.Core\PCSMNext.Core.csproj --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
-          dotnet build PCSMNext.Services\PCSMNext.Services.csproj --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
-          dotnet build LivelyAnimationEngine\LAE\LivelyAnimationEngine.csproj --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
-          dotnet build PCSMNext.App\PCSMNext.App.csproj --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
-
       # ----------------------------------------------------------
-      # Step 7: 发布 App (生成单文件应用)
+      # Step 9: 发布 App (生成单文件应用)
       # ----------------------------------------------------------
       - name: 发布应用
         run: >
@@ -138,7 +139,7 @@ jobs:
           -p:EnableCompressionInSingleFile=true
 
       # ----------------------------------------------------------
-      # Step 8: 上传构建产物
+      # Step 10: 上传构建产物
       # ----------------------------------------------------------
       - name: 上传构建产物
         uses: actions/upload-artifact@v4
@@ -148,8 +149,7 @@ jobs:
           retention-days: 30
 
   # ============================================================
-  # 可选: 创建 Release
-  # 仅在推送 tag 时触发，如 v1.0.0
+  # 可选: 创建 Release (仅在推送 tag 时触发，如 v1.0.0)
   # ============================================================
   release:
     name: 创建 Release
@@ -167,8 +167,7 @@ jobs:
           path: publish/
 
       - name: 打包为 ZIP
-        run: |
-          Compress-Archive -Path publish\* -DestinationPath PCSMNext.zip
+        run: Compress-Archive -Path publish\* -DestinationPath PCSMNext.zip
 
       - name: 创建 GitHub Release
         uses: softprops/action-gh-release@v2
