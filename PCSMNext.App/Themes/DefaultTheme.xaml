@@ -1,6 +1,8 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <!-- 基础色 -->
+
     <SolidColorBrush x:Key="ColorBg"         Color="#e2e8f0"/>
     <!-- 页面背景 -->
     <SolidColorBrush x:Key="ColorSidebar"    Color="#ffffff"/>
