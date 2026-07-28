@@ -1,0 +1,178 @@
+name: PCSMNext CI/CD
+
+# ============================================================
+# PCSMNext 自动构建工作流
+# 项目: .NET 10 WPF 桌面应用
+# 框架: net10.0-windows7.0 / net10.0
+# 解决方案格式: .slnx (需要 .NET 10 SDK)
+#
+# 关键修复: .slnx 和 .csproj 中 LAE 引用路径为
+#   LivelyAnimationEngine/LivelyAnimationEngine.csproj
+#   但实际路径为 LivelyAnimationEngine/LAE/LivelyAnimationEngine.csproj
+#   本工作流在克隆依赖后自动修正路径，确保 .slnx 能正常构建
+# ============================================================
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+    inputs:
+      configuration:
+        description: '构建配置'
+        required: true
+        default: 'Release'
+        type: choice
+        options:
+          - Debug
+          - Release
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  BUILD_CONFIGURATION: ${{ inputs.configuration || 'Release' }}
+
+jobs:
+  # ============================================================
+  # 构建 Job
+  # ============================================================
+  build:
+    name: 构建 PCSMNext
+    runs-on: windows-latest
+
+    steps:
+      # ----------------------------------------------------------
+      # Step 1: 检出 PCSMNext 代码
+      # ----------------------------------------------------------
+      - name: 检出 PCSMNext 代码
+        uses: actions/checkout@v4
+        with:
+          repository: ksayus/PCSMNext
+          fetch-depth: 0
+
+      # ----------------------------------------------------------
+      # Step 2: 安装 .NET 10 SDK
+      # ----------------------------------------------------------
+      - name: 安装 .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      # ----------------------------------------------------------
+      # Step 3: 验证环境
+      # ----------------------------------------------------------
+      - name: 显示 .NET 版本和文件结构
+        run: |
+          dotnet --version
+          dotnet --list-sdks
+          echo "=== 列出工作目录根路径 ==="
+          dir
+          echo "=== 验证 .slnx 文件 ==="
+          dir PCSMNext.slnx
+          echo "=== 验证项目目录 ==="
+          dir PCSMNext.App\PCSMNext.App.csproj
+          dir PCSMNext.Core\PCSMNext.Core.csproj
+          dir PCSMNext.Services\PCSMNext.Services.csproj
+
+      # ----------------------------------------------------------
+      # Step 4: 克隆 LivelyAnimationEngine 依赖仓库
+      #   .slnx 引用: LivelyAnimationEngine/LivelyAnimationEngine.csproj
+      #   实际路径:   LivelyAnimationEngine/LAE/LivelyAnimationEngine.csproj
+      #   克隆后自动修正路径差异
+      # ----------------------------------------------------------
+      - name: 克隆 LivelyAnimationEngine
+        run: |
+          git clone https://github.com/ksayus/LivelyAnimationEngine.git
+          echo "=== 验证 LAE 目录结构 ==="
+          dir LivelyAnimationEngine
+          dir LivelyAnimationEngine\LAE
+          dir LivelyAnimationEngine\LAE\LivelyAnimationEngine.csproj
+
+      # ----------------------------------------------------------
+      # Step 5: 修正 .slnx 中 LAE 项目路径
+      #   将 LivelyAnimationEngine/LivelyAnimationEngine.csproj
+      #   改为 LivelyAnimationEngine/LAE/LivelyAnimationEngine.csproj
+      # ----------------------------------------------------------
+      - name: 修正 .slnx 中的 LAE 项目路径
+        run: |
+          (Get-Content PCSMNext.slnx) -replace 'LivelyAnimationEngine/LivelyAnimationEngine.csproj', 'LivelyAnimationEngine/LAE/LivelyAnimationEngine.csproj' | Set-Content PCSMNext.slnx
+          echo "=== 修正后的 .slnx ==="
+          type PCSMNext.slnx
+
+      # ----------------------------------------------------------
+      # Step 6: 修正 PCSMNext.App.csproj 中 LAE 项目引用路径
+      #   将 ..\LivelyAnimationEngine\LivelyAnimationEngine.csproj
+      #   改为 ..\LivelyAnimationEngine\LAE\LivelyAnimationEngine.csproj
+      # ----------------------------------------------------------
+      - name: 修正 .csproj 中的 LAE 项目引用路径
+        run: |
+          (Get-Content PCSMNext.App\PCSMNext.App.csproj) -replace '\.\.\\LivelyAnimationEngine\\LivelyAnimationEngine\.csproj', '..\LivelyAnimationEngine\LAE\LivelyAnimationEngine.csproj' | Set-Content PCSMNext.App\PCSMNext.App.csproj
+          echo "=== 修正后的 PCSMNext.App.csproj ==="
+          type PCSMNext.App\PCSMNext.App.csproj
+
+      # ----------------------------------------------------------
+      # Step 7: 还原 NuGet 包
+      # ----------------------------------------------------------
+      - name: 还原 NuGet 包
+        run: dotnet restore PCSMNext.slnx
+
+      # ----------------------------------------------------------
+      # Step 8: 构建项目
+      # ----------------------------------------------------------
+      - name: 构建项目
+        run: >
+          dotnet build PCSMNext.slnx
+          --configuration ${{ env.BUILD_CONFIGURATION }}
+          --no-restore
+
+      # ----------------------------------------------------------
+      # Step 9: 发布 App (生成单文件应用)
+      # ----------------------------------------------------------
+      - name: 发布应用
+        run: >
+          dotnet publish PCSMNext.App\PCSMNext.App.csproj
+          --configuration ${{ env.BUILD_CONFIGURATION }}
+          --output publish
+          --self-contained true
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:EnableCompressionInSingleFile=true
+
+      # ----------------------------------------------------------
+      # Step 10: 上传构建产物
+      # ----------------------------------------------------------
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: PCSMNext-${{ env.BUILD_CONFIGURATION }}
+          path: publish/
+          retention-days: 30
+
+  # ============================================================
+  # 可选: 创建 Release (仅在推送 tag 时触发，如 v1.0.0)
+  # ============================================================
+  release:
+    name: 创建 Release
+    needs: build
+    runs-on: windows-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+
+    steps:
+      - name: 下载构建产物
+        uses: actions/download-artifact@v4
+        with:
+          name: PCSMNext-Release
+          path: publish/
+
+      - name: 打包为 ZIP
+        run: Compress-Archive -Path publish\* -DestinationPath PCSMNext.zip
+
+      - name: 创建 GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: PCSMNext.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
